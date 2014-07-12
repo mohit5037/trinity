@@ -3,7 +3,7 @@
 include 'config.php';
 include 'hf_new.php';
 
-$user_id=12;
+//$user_id=12;
 
 class user_info
 {
@@ -107,7 +107,7 @@ class user_profile
         
         foreach($this->th->transactions_coupon_id as $coupon_id)
         {
-            echo "coupon id = ".$coupon_id."<br>";
+            //echo "coupon id = ".$coupon_id."<br>";
             $query="select * from main_coupons where id=".$coupon_id;
             $result = mysql_query($query) or die("main coupon not found in mains table");
             $count=mysql_num_rows($result);
@@ -131,7 +131,7 @@ class user_profile
 			$pair_count = $row[1];
 			
 			// for debug purpose
-			echo "-----similar coupon id === ".$sc_id."<br>";
+			//echo "-----similar coupon id === ".$sc_id."<br>";
 			
 			// info of similar coupon
 			$query = "select valid_from,cat_id from main_coupons where id = '$sc_id'";
@@ -203,101 +203,23 @@ class user_profile
 		}
 		//////////////////////////////////////////
 		
-                /*$j=1;
-                while($j <= 14 && $row['sc'.$j."_id"]!=NULL )
-                { 
-                    $max = 0;
-                    $min = $min_constant;
-                    
-                    $category=$row['sc'.$j."_cat_id"];
-                    $category_rank=$this->cr->cat_ranks[$category];
-                    
-                    
-                    $sc_id = $row['sc'.$j."_id"];
-                    $c_old = $row["sc".$j."_c_value"];
-                    $coupon_id = $row["id"];
-		    
-		    //echo "-----Similar Coupon Id = ".$sc_id."<br>";
-		    //echo "-----".$category."   ".$coupon_id."<br>";
-                    
-                    $min_max_hf = hf($sc_id,$j,$row["valid_from"],$d,$c_old,$coupon_id,$max,$min);
-                    $hf=$min_max_hf["max"];
-                    
-                    //echo $row["id"]." ->-> ".$row["gender"]."<br>";
-                    
-                    $gender_query="select gender,age_group from main_coupons where id=".$sc_id;
-            	    $gender_result = mysql_query($gender_query) or die("chali ni");
-            	    $gender_count=mysql_num_rows($gender_result);
-            	    
-            	    if($gender_count > 0)
-            	    $gender_row = mysql_fetch_array($gender_result);
-            	    
-            	    $gender = $gender_row["gender"];
-		    $age_group = $gender_row["age_group"];
-                    
-		    // increasing or decreasing hf based on user gender
-		    if($gender == 'M')
-		    {
-			if($this->ui->user_row["gender"] == 'M')
-			{
-			    $hf *= $gender_advantage_weight;
-			}
-			else
-			{
-			    $hf *= $gender_disadvantage_weight;
-			}
-		    }
-		    
-		    else if($gender == 'F')
-		    {
-			if($this->ui->user_row["gender"] == 'F')
-			{
-			    $hf *= $gender_advantage_weight;
-			}
-			else
-			{
-			    $hf *= $gender_disadvantage_weight;
-			}
-		    }
-		    
-		    // increasing or decreasing hf based on user's age group
-		    if($age_group != 5)
-		    {
-			if($this->ui->user_row["age_group"] == $age_group)
-			{
-			    $hf *= $age_group_advantage_weight;
-			}
-		    }
-		    
-                    $item_score=$hf*$category_rank;
-                    
-                    //echo "item_score of ".$coupon_id." & ".$sc_id." is -> ".$item_score."<br>";
-                    
-      
-                    if(array_key_exists($sc_id,$this->map))
-                    {
-                        $this->map[$sc_id]+=$item_score;
-                    }
-                    else
-                    $this->map[$sc_id]=$item_score;
-                    
-                    $j++;
-                } */
+               
             }
         }
         
         arsort($this->map);
         
-        foreach($this->map as $id=>$is)
+        /*foreach($this->map as $id=>$is)
         {
 	    $query="select * from main_coupons where id=".$id;
             $result = mysql_query($query) or die("chali ni");
 	    $row = mysql_fetch_array($result);
             echo "coupon_id = ".$id."----------"."category_id = ".$row['cat_id']."----------"."Item_score = ".$is."<br>";
-        }
+        }*/
         
     }
 }
+
 //echo "mohit";
-$up= new user_profile($user_id,$number_of_categories,$d,$min_constant);
+//$up= new user_profile($user_id,$number_of_categories,$d,$min_constant);
 ?>
