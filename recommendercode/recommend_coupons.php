@@ -3,7 +3,7 @@
 include 'config.php';
 include 'hf.php';
 
-//$user_id=12;
+$user_id=12;
 
 class user_info
 {
@@ -198,16 +198,16 @@ class user_profile
         
         arsort($this->map);
         
-       /* foreach($this->map as $id=>$is)
+        foreach($this->map as $id=>$is)
         {
-	    $query="select cat_id from main_coupons where id=".$id;
+	    $query="select * from main_coupons where id=".$id;
             $result = mysql_query($query) or die("chali ni");
 	    $row = mysql_fetch_array($result);
-            echo $id." -> ".$row[0]." -> ".$is."<br>";
-        }*/
+	    echo "coupon_id = ".$id."----------"."category_id = ".$row['cat_id']."----------"."Item_score = ".$is."<br>";
+        }
         
     }
 }
 //echo "mohit";
-//$up= new user_profile($user_id,$number_of_categories,$d,$min_constant);
+$up= new user_profile($user_id,$number_of_categories,$d,$min_constant);
 ?>
