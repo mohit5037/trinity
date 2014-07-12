@@ -4,4 +4,6 @@ function time()
         $todaydate = new DateTime();
         $currenttime = date_format($todaydate, 'Y-m-d H:i:s');
         return $currenttime;
+        
+        
 }
