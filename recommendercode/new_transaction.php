@@ -13,11 +13,7 @@ $user_id = which user has bought that coupon
 
 
 include 'config.php';
-include 'hf.php';
-include 'func_for_new_transaction.php';
 include '../customerapp/calculate_interests.php';
-//include 'time.php';
-
 
 class new_transaction{
     
@@ -50,14 +46,9 @@ class new_transaction{
         //function to send mail to user and merchant
         $this->send_confirmation_mails();
         
-        //echo count($this->last_transactions);
 	// looping over the last 10 or less than 10 transactions
         for($i = 0 ; $i < count($this->last_transactions) ; $i++)
         {
-           //echo $this->last_transactions[$i]['id']." ".$this->coupon_id."<br>";
-
-		//if($this->last_transactions[$i]["id"]==$this->coupon_id)
-            //{
             // updating the pair counts in counts table
             $query = "update counts set count = count+1 where coupon1_id = ".$this->coupon_id." and coupon2_id=".$this->last_transactions[$i]["id"]." or coupon2_id=". $this->coupon_id." and coupon1_id=".$this->last_transactions[$i]["id"];
             $result = mysql_query($query) or die("update query nahi chali ".$this->last_transactions[$i]["id"]." ".$this->coupon_id."<br>");
@@ -71,17 +62,9 @@ class new_transaction{
                 {
                     $query="insert into counts values ('".$this->last_transactions[$i]["id"]."','".$this->coupon_id."','1')";
                     $result22 = mysql_query($query) or die("counts table not updated");
-                    
-		    // calling func to update the similar coupon list of last transacted coupon
-                    func($this->last_transactions , $this->new_coupon , $this->coupon_id , $i , $min_constant);
                 }
             }
-            else
-            {
-                func($this->last_transactions , $this->new_coupon , $this->coupon_id , $i , $min_constant);
-            }
         }
-        //}
     }
     
     // used to insert the new transaction entry in transaction table
@@ -105,17 +88,14 @@ class new_transaction{
         while( $last_transactions = mysql_fetch_array($result))
         {
             $coupon_id1 = $last_transactions["coupon_id"];
-            //echo $coupon_id1."<br>";
             $query = "select * from main_coupons where id=".$coupon_id1;
             $result2 = mysql_query($query) or die("main_coupons");
             $count=mysql_num_rows($result2 );
-	if($count==1)
-	{
-            $main_coupon_row = mysql_fetch_array($result2);
-            //echo $main_coupon_row['id']."<br>";
-            $this->last_transactions[] = $main_coupon_row;
-        }
-            
+	    if($count==1)
+	    {
+		$main_coupon_row = mysql_fetch_array($result2);
+		$this->last_transactions[] = $main_coupon_row;
+	    }  
         }
         
     }
@@ -152,9 +132,7 @@ class new_transaction{
     function increment_interest_count()
     {
            $count_no = "count_".$this->new_coupon["cat_id"];
-           //echo $count_no;
            $query = "update users set $count_no = $count_no + 10 where user_id = '$this->user_id' ";
-           //echo "<br>".$query;
            $result = mysql_query($query) or die("category interests not updated");
            
            $obj = new calculate_interests($this->user_id);
