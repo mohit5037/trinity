@@ -6,182 +6,63 @@ Approve.php
 
 /*include the configuration file and the heuristic function file*/
 include 'config.php';
-include 'hf.php';
 
 // coupon_id supplied by front end when admin clicks on approve button
-//$coupon_id= 125;
+//$coupon_id= 158;
 
 // variable to decide the priority of new coupon again supplied by front end
 //$insert_level = 5;
 
-
-/* This class gets category ID and the merchant ID of the coupon being approved */
-class get_info
+class approve
 {
-	var $cat_id, $merchant_id;
+	var $coupon_id;
+	var $insert_level;
+	var $coupon_info;
 	
-	function get_info($coupon_id)
+	function approve($coupon_id,$insert_level)
 	{
-		//echo $coupon_id."<br>";
-		$query = "select cat_id, merchant_id from premature where id='".$coupon_id."'";
-		$result = mysql_query($query) or die("didn't get a coupon in premature table");
-		$row = mysql_fetch_array($result);
+		// setting the class parameters
+		$this->coupon_id = $coupon_id;
+		$this->insert_level = $insert_level;
 		
-		$this->cat_id = $row["cat_id"];
-		$this->merchant_id = $row["merchant_id"];
-		//echo $this->cat_id." ".$this->merchant_id."<br>";	
+		//getting info of coupon to be approved
+		$this->get_info();
+		$this->shifter();
 	}
-}
-
-
-
-
-/* This class is responsible for calculating the c value of the coupon being approved */
-class c_values
-{
-	//these are the variables used in the process of calculating the c value for the coupon
-	var $max,$min;
 	
-	
-	/*
-	 *function c_values()
-	 *Constructor of the class which does all the work
-	 *Arguments ->
-		 *Category ID of the coupon to be approved
-		 *d is the constant in the c/d ratio
-		 *min_constant is the contant that is assigned to min initially
-	*/
-	
-	
-	function c_values($cat_id, $d, $min_constant)
+	function get_info()
 	{
-		//set the value of min as min_constant
-		$this->max = 0;
-		$this->min=$min_constant;
-		
-		//Query to get all the coupons from main_coupons which are of the same category as the coupon to be approved
-		//and loop over all the entries of the result
-		$query="select * from main_coupons where cat_id='".$cat_id."'";
-		$result=mysql_query($query) or die("query couldn't be executed");
-		$count=mysql_num_rows($result);
-		//row represents complete information of one coupon of the same category from the main table
-		if($count != 0)
+		$query = "select * from premature where id='$this->coupon_id'";
+		$result = mysql_query($query) or die("coupon not found in premature table");
+		if(mysql_num_rows($result) > 0)
 		{
-		while($row = mysql_fetch_array($result))
-		{
-			
-			
-			//get the coupon_id of the main_coupon tabel entry which has the same category as the coupon to be approved
-			$coupon_id=$row["id"];
-			//echo $coupon_id."-----<br>";
-			//j is a variable used to count the number of iterations
-			//loop over the similar coupon entries for one main_coupon entry which is of the same category
-			//this loop tries to calculate the HF value of the coupon to be approved and a similar coupon entry
-			//and then updates the min and max HF values in this->min and this->max
-			$j=1;
-			while($j<=15 && $row['sc'.$j."_id"]!=NULL)
-			{
-			    //get the id of the similar coupon entry and its c value
-			    $sc_id=$row['sc'.$j."_id"];
-			    $c_old = $row["sc".$j."_c_value"];
-			    
-			    //get the minimum and maximum HF values using the HF function and update the max and min HF values
-			    $min_max_hf = hf($sc_id,$j,$row["valid_from"],$d,$c_old,$coupon_id,$this->max,$this->min);
-			    $this->max=$min_max_hf["max"];
-			    $this->min=$min_max_hf["min"];
-			    $j++;
-			}
-			
-			
+			$row = mysql_fetch_array($result);
+			$this->coupon_info = $row;
 		}
-		if($this->min == $min_constant)
-		    $this->min = 0;
-		}
-		else
-		$this->min = 0;
-		//echo "max hf is ".$this->max." & min hf is ".$this->min."<br>";
-	}
-}
-
-
-
-
-
-//this class inserts the coupon into the approved table
-class inserter
-{
-	var $cv,$gi,$step,$c_value;
-	
-	/*
-	 *the constructor of the class
-	 *gets the coupon id of the coupon to be inserted
-	 *d-> the constant
-	 *insert level sets the priority of teh coupon which in turn determines the c value
-	 *min constant is the value to be assigned to min
-	 */
-	function inserter($coupon_id,$d,$insert_level,$min_constant)
-	{
-		//echo $coupon_id."<br>";
-		$this->gi=new get_info($coupon_id);
-		$this->cv=new c_values($this->gi->cat_id,$d, $min_constant);
-		$this->step();
-		$this->generate_c_value($d,$insert_level);
-		$this->shifter($coupon_id);
 	}
 	
-	
-	/*
-	 *this function gets the step value and stores it in the class variable step
-	*/
-	function step()
+	function shifter()
 	{
-		//step value is the difference of max C value and min C value of all the coupons in that category divided by 5
-		//echo $this->cv->max." ".$this->cv->min."<br>";
-		$this->step = ($this->cv->max - $this->cv->min)/5;
-		//echo "step is ".$this->step."<br>";
-	}
-	
-	/*
-	 *this function generates the c value for the coupon to be inserted
-	 *takes parameters d and the priority (insert level)
-	*/
-	function generate_c_value($d,$insert_level)
-	{
-		//gets the c value to be assigned to the HF based on step and insert level
-		$hf = $this->cv->min + ($insert_level * $this->step);
-		
-		//we get the c value for a new coupon simply by multiplying hf with the constant d
-		//and we round the c value to an integer
-		$this->c_value = round($d * $hf);
-		//echo " ".$this->c_value;
-	}
-	
-	/*
-	 *shifter function shifts a coupon from premature table to approved table after getting the c value
-	*/
-	function shifter($coupon_id)
-	{
-		$query="select * from premature where id=".$coupon_id;
-		$result8 = mysql_query($query);
-		$row = mysql_fetch_array($result8);
-                
                 date_default_timezone_set("Asia/Calcutta");
                 $todaydate = new DateTime();
                 $currenttime = date_format($todaydate, 'Y-m-d H:i:s');
 
-		$query =    "INSERT INTO `approved` (`id`,`c_value`,`cat_id`, `name`, `description`, `create_date`, 
-                                                                         `valid_from`, `valid_to`,`merchant_id`,`approved_date`, `image`, `price`, 'gender', 'age_group')
-                                                                          VALUES ('".$coupon_id."','".$this->c_value."','".$row['cat_id']."','".$row['name']."','".$row['description']."','".$row['create_date']."',
-                                                                          '".$row['valid_from']."','".$row['valid_to']."','".$row['merchant_id']."','".$currenttime."','".$row['image']."','".$row['price']."','".$row['gender']."','".$row['age_group']."')";                      
-                $result9 = mysql_query($query);
-
-               $query2 = "DELETE FROM `premature` WHERE  `id`='".$coupon_id."'";
-                $deleteresult = mysql_query($query2);
- 
+		// query to add coupon into approved table
+		$query =    "INSERT INTO `approved` (`id`,`cat_id`, `name`, `description`, `create_date`, 
+                                                                         `valid_from`, `valid_to`,`merchant_id`,`approved_date`, `image`, `price`, `gender`, `age_group`)
+                                                                          VALUES ('".$this->coupon_id."','".$this->coupon_info['cat_id']."','".$this->coupon_info['name']."','".$this->coupon_info['description']."','".$this->coupon_info['create_date']."',
+                                                                          '".$this->coupon_info['valid_from']."','".$this->coupon_info['valid_to']."','".$this->coupon_info['merchant_id']."','".$currenttime."','".$this->coupon_info['image']."','".$this->coupon_info['price']."','".$this->coupon_info['gender']."','".$this->coupon_info['age_group']."')";                     
+                $result = mysql_query($query) or die(mysql_error());
 		
+		// query to delete coupon from premature table
+                $query = "DELETE FROM `premature` WHERE  `id`='$this->coupon_id'";
+                $result = mysql_query($query) or die(mysql_error);
 	}
 }
 
-//inserter = new inserter($coupon_id   , $d,   $insert_level  ,$min_constant);
+
+
+
+//$approve = new approve($coupon_id, $insert_level);
 
 ?>
