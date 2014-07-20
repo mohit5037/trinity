@@ -1,6 +1,6 @@
 <?php
 include '../recommendercode/config.php';
-//$user_id = 1;
+$user_id = 12;
 
 class calculate_interests
 {
@@ -34,6 +34,7 @@ class calculate_interests
         {
             $interest = ceil(($this->counts[$j]/$max_count)*9) + 1;
             $query .= "cat".$j."_rank = ".$interest." ,";
+            echo "cat_id = ".$j."------>".$interest."<br>";
         }
         $query = trim($query,",");
         $query .= " where user_id = '$user_id'";
@@ -42,5 +43,5 @@ class calculate_interests
     }
 }
 
-//$obj = new calculate_interests($user_id);
+$obj = new calculate_interests($user_id);
 ?>

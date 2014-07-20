@@ -55,8 +55,8 @@ class transaction_history_parser
         
         $query = trim($query,",");
         $query .= " where card_number = ".$card_number;
-        //echo $query;
-        //$result = mysql_query($query) or die("query failed while updating counts in users table  ". mysql_error());
+        echo $query;
+        $result = mysql_query($query) or die("query failed while updating counts in users table  ". mysql_error());
         //$update_interests = new calculate_interests($user_id);
     }
     

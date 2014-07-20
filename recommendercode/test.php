@@ -1,14 +1,8 @@
 <?php
+include 'config.php';
 
-                date_default_timezone_set("Asia/Calcutta");
-                $todaydate = new DateTime();
-                $currenttime = date_format($todaydate, 'Y-m-d H:i:s');
-                echo $currenttime;
-
-
-              /*  if($currenttime  < '18:33:06 27:05:2014')
-                echo "yes";
-                else
-                echo "no";*/
+$query = "LOAD DATA LOCAL INFILE './I-coupons_offers.txt' INTO TABLE icici_offers FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'  ";
+$result = mysql_query($query) or die(mysql_error());
+//$row = mysql_fetch_array($result);
 
 ?>
