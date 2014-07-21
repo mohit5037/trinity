@@ -1,39 +1,43 @@
 <?php
 include './config.php';
 
+/************************************
+ recommend_offers.php
+ Author: Mohit Kumar
+ 
+ Arguments:
+            $map : map containing category id and number of transactions in that category as key value pair
+            
+*************************************/
+
 class recommend_offers
 {
-    public $counts = array();
-    public $offers = array();
-    public $encoded_offers;
+    public $counts = array();       // to store normalised counts
+    public $offers = array();       // to store offers for a user
     
+    // contructor function
     function recommend_offers($map)
-    {   
+    {
+        // variable to store sum of transactions
         $sum_counts = 0;
 
+        // summing in a loop
         foreach($map as $key=>$val)
         {
-            //$this->counts[$i] = $row["count_".$i.""];
             $sum_counts += $val;   // calculating sum of all the counts
         }
         
+        // normalising the counts
         $i = 0;
         foreach($map as $key=>$val)
         {
             $this->counts[$i++] = ($val/$sum_counts)*10;
-            /*if($this->counts[$i] < 1 && $this->counts[$i] >0)
-            {
-                $this->counts[$i] = 1;
-            }
-            else
-            {
-                $this->counts[$i] = floor($this->counts[$i]);
-            }*/
         }
         
+        // sort the norm. counts in decreasing order
         arsort($this->counts);
         
-        
+        // loop over the map and get offers from each cat acc to their counts
         $i = 0;
         foreach($this->counts as $key=>$val)
         {
@@ -64,6 +68,7 @@ class recommend_offers
             
         }
         
+        // for debugging purposes only
         
         /*foreach($this->counts as $key=>$val)
         {
@@ -77,12 +82,12 @@ class recommend_offers
             echo $item['Brand']."------->".$item['Offer']."<br>";
         }*/
         
-        $this->encoded_offers = ($this->offers);
+        
     }
     
-    function get_encoded_offers()
+    function get_offers()
     {
-        return $this->encoded_offers;
+        return $this->offers;
     }
 }
 
