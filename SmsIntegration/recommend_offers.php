@@ -5,6 +5,7 @@ class recommend_offers
 {
     public $counts = array();
     public $offers = array();
+    public $encoded_offers;
     
     function recommend_offers($map)
     {   
@@ -76,7 +77,12 @@ class recommend_offers
             echo $item['Brand']."------->".$item['Offer']."<br>";
         }*/
         
-        echo json_encode($this->offers);
+        $this->encoded_offers = ($this->offers);
+    }
+    
+    function get_encoded_offers()
+    {
+        return $this->encoded_offers;
     }
 }
 

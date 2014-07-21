@@ -2,37 +2,23 @@
 include './config.php';
 include './recommend_offers.php';
 
-$card_number = '5701042908';
+//$card_number = '5701042908';
 
 class transaction_history_parser
 {
+    public $recommend_offers;
     
     function transaction_history_parser($card_number)
     {
-        $query = "select terminal_owner,terminal_city from transaction_history1 where account_number = '$card_number'";
+        $query = "select cat_id from transaction_history1 where account_number = '$card_number'";
         $result = mysql_query($query) or die("no entry for this account number");
         $map = array();
         while($row = mysql_fetch_array($result))
         {
-           // echo $row['terminal_owner']."<br>";
-            $terminal = $row['terminal_owner'];
-            $query = "select cat_id from transaction_history1 where terminal_owner = '$terminal' ";
-            $result_inner = mysql_query($query) ;//or die("no entry :".mysql_error());
-            if(mysql_num_rows($result_inner) > 0)
-            {
-		$row_inner = mysql_fetch_array($result_inner);
-		if(array_key_exists($row_inner["cat_id"] , $map))
-		$map[$row_inner["cat_id"]] += 1;
-		else if($row_inner["cat_id"] !=0)
-		$map[$row_inner["cat_id"]] = 1;
-            }
-            else
-            {
-	            echo $row["terminal_owner"]." -------  ".$row["terminal_city"]."<br>";
-	            $terminal_city = $row["terminal_city"];
-	            $query = "insert into sorted_table (frequency,terminal_owner,terminal_city) values ('5','$terminal','$terminal_city')";
-	            $result_inner = mysql_query($query); //or die (mysql_error()) ;
-            }
+		if(array_key_exists($row["cat_id"] , $map))
+		$map[$row["cat_id"]] += 1;
+		else if($row["cat_id"] !=0)
+		$map[$row["cat_id"]] = 1;
         }
         
         ksort($map);
@@ -45,12 +31,18 @@ class transaction_history_parser
         }*/
         
         
-	$recommend_offers = new recommend_offers($map);
+	$rec_offers = new recommend_offers($map);
+	$this->recommend_offers = $rec_offers->get_encoded_offers();
         
+    }
+    
+    function get_rec_offers()
+    {
+	return $this->recommend_offers;
     }
     
 }
 
-$thp = new transaction_history_parser($card_number);
+//$thp = new transaction_history_parser($card_number);
 
 ?>
