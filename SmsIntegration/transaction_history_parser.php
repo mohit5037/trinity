@@ -62,6 +62,7 @@ class transaction_history_parser
     
 }
 
+// for debugging purposes only
 //$thp = new transaction_history_parser($card_number);
 
 ?>
